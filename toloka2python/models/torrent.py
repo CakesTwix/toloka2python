@@ -19,6 +19,8 @@ class TorrentElement:
 @dataclass
 class TorrentAccount:
     forum: str
+    forum_url: str
     name: str
     seeders: int
     leechers: int
+    url: str

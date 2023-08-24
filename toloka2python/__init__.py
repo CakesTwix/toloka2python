@@ -5,7 +5,7 @@ import logging
 
 import requests
 from bs4 import BeautifulSoup
-from toloka2python.models.torrent import TorrentElement
+from toloka2python.models.torrent import TorrentElement, TorrentAccount
 from toloka2python.models.account import Account
 
 # Set Logging
@@ -73,10 +73,12 @@ class Toloka:
 
     @property
     def html(self):
+        """Отримати HTML головної сторінки"""
         return self.session.get(self.toloka_url)
 
     @property
     def me(self):
+        """Отримати інформацію про себе"""
         # Get main page for get account url
         soup = BeautifulSoup(self.html.text, "html.parser")
 
@@ -84,17 +86,42 @@ class Toloka:
         me_html = self.session.get(
             f"{self.toloka_url}/{soup.find('a', string='Профіль')['href']}"
         ).text
-        account_soup = BeautifulSoup(me_html, "html.parser").find_all("td", class_="bodyline")[1]
+        account_soup = BeautifulSoup(me_html, "html.parser").find_all(
+            "td", class_="bodyline"
+        )[1]
 
-        #  	Доступна інформація про ...
+        # Доступна інформація про ...
         info_soup = account_soup.find_all("td", class_="row1")[1].find_all("tr")
 
         # Зв'язок з ...
         communicate_soup = account_soup.find_all("td", class_="row1")[2].find_all("tr")
-        # logging.debug(info_soup)
 
-        # logging.debug(account_soup)
-        # TODO: Account
+        # Torrent-профіль користувача ...
+        torrent_profile_soup = account_soup.find("td", class_="row2").find_all("tr")
+
+        upload_torrent_list = []
+        # TODO: Implement
+        download_torrent_list = []
+
+        # Активні торренти
+        for upload_torrent in account_soup.find_all("table", class_="forumline")[
+            1
+        ].find_all("tr")[6:]:
+            if len(upload_torrent) == 9:
+                # logging.debug(upload_torrent)
+                upload_torrent_list.append(
+                    TorrentAccount(
+                        upload_torrent.find("span", class_="gen").text,
+                        upload_torrent.find("a", class_="gen")["href"],
+                        upload_torrent.find("a", class_="genmed").text,
+                        upload_torrent.find("span", class_="seedmed").text,
+                        upload_torrent.find("span", class_="leechmed").text,
+                        upload_torrent.find("a", class_="genmed")["href"],
+                    )
+                )
+
+        # logging.debug(torrent_profile_soup)
+
         return Account(
             soup.find("a", string="Профіль")["href"],
             account_soup.find("img")["src"],
@@ -104,22 +131,56 @@ class Toloka:
             info_soup[0].find_all("span", class_="gen")[1].text,
             info_soup[1].find_all("span", class_="gen")[1].text,
             int(info_soup[2].find_all("span", class_="gen")[1].text),
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
+            torrent_profile_soup[1]
+            .find("span", class_="seed")
+            .find("b")
+            .text.replace("\xa0", " "),
+            torrent_profile_soup[2]
+            .find("span", class_="leech")
+            .find("b")
+            .text.replace("\xa0", " "),
+            torrent_profile_soup[1]
+            .find_all("span", class_="seed")[1]
+            .find("b")
+            .text.replace("\xa0", " "),
+            torrent_profile_soup[2]
+            .find_all("span", class_="leech")[1]
+            .find("b")
+            .text.replace("\xa0", " "),
+            torrent_profile_soup[1]
+            .find_all("span", class_="seed")[2]
+            .find("b")
+            .text.replace("\xa0", " "),
+            torrent_profile_soup[2]
+            .find_all("span", class_="leech")[2]
+            .find("b")
+            .text.replace("\xa0", " "),
+            torrent_profile_soup[3]
+            .find_all("span", class_="gen")[1]
+            .text.replace("\xa0", " "),
+            torrent_profile_soup[3]
+            .find_all("span", class_="gen")[3]
+            .text.replace("\xa0", " "),
+            torrent_profile_soup[3]
+            .find_all("span", class_="gen")[4]
+            .text.replace("\xa0", " "),
+            torrent_profile_soup[4]
+            .find_all("span", class_="gen")[1]
+            .text.replace("\xa0", " "),  # TODO: Fix ul_dl_rating
+            torrent_profile_soup[4]
+            .find_all("span", class_="gen")[1]
+            .text.replace("\xa0", " "),  # TODO: Fix ul_dl_rating
+            torrent_profile_soup[6].find("span", class_="seed").text,
+            torrent_profile_soup[7].find_all("span", class_="gen")[1].text,
+            torrent_profile_soup[8]
+            .find("span", class_="leech")
+            .find("b")
+            .text.replace("\xa0", " "),
+            torrent_profile_soup[8]
+            .find("span", class_="seed")
+            .find("b")
+            .text.replace("\xa0", " "),
+            torrent_profile_soup[9].find_all("span", class_="gen")[1].text,
+            upload_torrent_list,
+            download_torrent_list,
         )
