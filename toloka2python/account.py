@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 
 from toloka2python.models.account import Account
 from toloka2python.models.torrent import TorrentAccount
+from toloka2python.utils import extract_floats
 
 
 def get_account_info(html_text: str) -> Account:
@@ -94,8 +95,8 @@ def get_account_info(html_text: str) -> Account:
         bonus_seeding,
         bonus_seeding_now,
         bonus_seeding_yesterday,
-        ul_dl_rating,                # TODO: Fix ul_dl_rating
-        ul_dl_rating_without_bonus,  # TODO: Fix ul_dl_rating
+        extract_floats(ul_dl_rating)[0], 
+        extract_floats(ul_dl_rating_without_bonus)[1],
         int(releases),
         int(0 if thanks is None else thanks),
         max_download,

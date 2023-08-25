@@ -12,3 +12,14 @@ def convert_to_bytes(size):
         return 0
 
     return int(number * multipliers[unit])
+
+def extract_floats(input_string):
+    """Отримання чисел із рядка"""
+    floats = []
+    for word in input_string[:-1].split():
+        try:
+            floats.append(float(word))
+        except ValueError:
+            pass
+
+    return floats
