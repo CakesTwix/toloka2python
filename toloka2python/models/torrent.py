@@ -6,6 +6,7 @@ class TorrentElement:
     """Датаклас, що містить інформацію про торрент зі списку торрентів під час пошуку"""
     forum: str
     forum_url: str
+    url: str
     name: str
     author: str
     verify: bool

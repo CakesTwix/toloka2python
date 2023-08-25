@@ -59,6 +59,7 @@ class Toloka:
                 TorrentElement(
                     torrent[1].text,  # Форум
                     torrent[1].find("a", class_="gen")["href"],  # Посил на форум
+                    torrent[2].find("a", class_="gen")["href"],  # Посил на торрент
                     torrent[2].text,  # Назва
                     torrent[3].text,  # Автор
                     True if torrent[4].text == "+" else False,  # Пер
@@ -94,3 +95,6 @@ class Toloka:
         """Отримати інформацію про користувача за посиланням"""
         # Get request to account url
         return get_account_info(self.session.get(url).text)
+
+    def get_torrent(self, url):
+        pass

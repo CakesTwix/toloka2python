@@ -32,12 +32,12 @@ def get_account_info(html_text: str) -> Account:
             # logging.debug(upload_torrent)
             upload_torrent_list.append(
                 TorrentAccount(
-                    upload_torrent.find("span", class_="gen").text,
-                    upload_torrent.find("a", class_="gen")["href"],
-                    upload_torrent.find("a", class_="genmed").text,
-                    upload_torrent.find("span", class_="seedmed").text,
-                    upload_torrent.find("span", class_="leechmed").text,
-                    upload_torrent.find("a", class_="genmed")["href"],
+                    upload_torrent.find("span", class_="gen").text,      # Forum name
+                    upload_torrent.find("a", class_="gen")["href"],      # Forum url
+                    upload_torrent.find("a", class_="genmed").text,      # Torrent Name
+                    upload_torrent.find("span", class_="seedmed").text,  # Seeders
+                    upload_torrent.find("span", class_="leechmed").text, # Leechers
+                    upload_torrent.find("a", class_="genmed")["href"],   # Url
                 )
             )
 
