@@ -5,7 +5,7 @@ import logging
 
 import requests
 from bs4 import BeautifulSoup
-from toloka2python.models.torrent import TorrentElement, TorrentAccount
+from toloka2python.models.torrent import TorrentElement, TorrentAccount, Torrent
 from toloka2python.models.account import Account
 from toloka2python.account import get_account_info
 
@@ -97,4 +97,30 @@ class Toloka:
         return get_account_info(self.session.get(url).text)
 
     def get_torrent(self, url):
-        pass
+        """Отримати інформацію про торрент за посиланням"""
+        soup = BeautifulSoup(self.session.get(url + "?spmode=full&dl=names#torrent").text, "html.parser")
+
+        name = soup.find("a", class_="maintitle").text
+        url = soup.find("a", class_="maintitle")["href"]
+        img = soup.find("img", attrs={"alt": name})
+        if img:
+            img = img.get("src", None)
+
+        torrent_name = soup.find("tr", class_="row6_to").text
+        registered_date = soup.find("td", string=" Зареєстрований: ").find_next("td").contents[0][3:]
+        size = soup.find("td", string=" Розмір: ").find_next("span").contents[0].replace("\xa0", "")
+        thanks = soup.find("td", string=" Подякували: ").find_next("span").contents[0]
+        rating = soup.find("span", attrs={"itemprop": "ratingValue"}).text
+        torrent_url = soup.find("a", string="Завантажити")["href"]
+
+        return Torrent(
+            name,
+            url,
+            img,
+            torrent_name.replace("\xa0", " ").replace("\n", "")[1:-1],
+            registered_date,
+            size,
+            int(thanks),
+            rating,
+            torrent_url,
+        )

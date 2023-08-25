@@ -1,5 +1,17 @@
 from dataclasses import dataclass
 
+@dataclass
+class Torrent:
+    """Датаклас, який містить інформацію про торрент"""
+    name: str
+    url: str
+    img: str
+    torrent_name: str
+    registered_date: str
+    size: str
+    thanks: int
+    rating: int
+    torrent_url: str
 
 @dataclass
 class TorrentElement:
