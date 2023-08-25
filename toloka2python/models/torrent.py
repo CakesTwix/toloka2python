@@ -3,7 +3,9 @@ from dataclasses import dataclass
 
 @dataclass
 class TorrentElement:
+    """Датаклас, що містить інформацію про торрент зі списку торрентів під час пошуку"""
     forum: str
+    forum_url: str
     name: str
     author: str
     verify: bool
@@ -18,6 +20,7 @@ class TorrentElement:
 
 @dataclass
 class TorrentAccount:
+    """Датаклас, що містить інформацію про торрент зі списку торрентів з акаунта користувача"""
     forum: str
     forum_url: str
     name: str

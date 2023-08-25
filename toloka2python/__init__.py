@@ -57,6 +57,7 @@ class Toloka:
             torrent_list.append(
                 TorrentElement(
                     torrent[1].text,  # Форум
+                    torrent[1].find("a", class_="gen")["href"],  # Посил на форум
                     torrent[2].text,  # Назва
                     torrent[3].text,  # Автор
                     True if torrent[4].text == "+" else False,  # Пер
