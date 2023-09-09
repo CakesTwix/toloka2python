@@ -59,7 +59,7 @@ class Toloka:
                 TorrentElement(
                     torrent[1].text,  # Форум
                     torrent[1].find("a", class_="gen")["href"],  # Посил на форум
-                    torrent[2].find("a", class_="gen")["href"],  # Посил на торрент
+                    torrent[2].find("a")["href"],  # Посил на торрент
                     torrent[2].text,  # Назва
                     torrent[3].text,  # Автор
                     True if torrent[4].text == "+" else False,  # Пер
@@ -124,3 +124,6 @@ class Toloka:
             rating,
             torrent_url,
         )
+
+    def download_torrent(self, torrent_url: str):
+        return self.session.get(torrent_url).content
