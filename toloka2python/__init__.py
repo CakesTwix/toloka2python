@@ -30,7 +30,7 @@ class Toloka:
 
     toloka_url = "https://toloka.to"
 
-    def __init__(self, username: str, password: str, ssl="on"):
+    def __init__(self, username: str, password: str, ssl="on", file: str = None):
         self.session = requests.Session()
         self.session.headers = self.headers
 
@@ -48,8 +48,10 @@ class Toloka:
                     "login": "Вхід",
                 },
             )
-            with open("cookie.txt", "w", encoding="utf-8") as f:
-                json.dump(requests.utils.dict_from_cookiejar(self.session.cookies), f)
+
+            if file:
+                with open(file, "w", encoding="utf-8") as f:
+                    json.dump(requests.utils.dict_from_cookiejar(self.session.cookies), f)
 
         # We have cookie, no need do request
         else:
