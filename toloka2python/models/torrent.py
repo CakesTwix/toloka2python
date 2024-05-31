@@ -3,15 +3,18 @@ from dataclasses import dataclass
 @dataclass
 class Torrent:
     """Датаклас, який містить інформацію про торрент"""
-    name: str
-    url: str
-    img: str
-    torrent_name: str
-    registered_date: str
-    size: str
-    thanks: int
-    rating: int
-    torrent_url: str
+    forum: str = ""
+    forum_url: str = ""
+    url: str = ""
+    name: str = ""
+    author: str = ""
+    img: str = ""
+    torrent_name: str = ""
+    date: str = ""
+    size: str = ""
+    thanks: int = ""
+    rating: int = ""
+    torrent_url: str = ""
 
 @dataclass
 class TorrentElement:
@@ -22,7 +25,7 @@ class TorrentElement:
     name: str
     author: str
     verify: bool
-    download_link: str
+    torrent_url: str
     size: str
     status: str
     seeders: int

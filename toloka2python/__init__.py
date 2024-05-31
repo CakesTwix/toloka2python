@@ -5,6 +5,7 @@ import logging
 
 import requests
 from bs4 import BeautifulSoup
+from datetime import datetime
 from toloka2python.models.torrent import TorrentElement, TorrentAccount, Torrent
 from toloka2python.models.account import Account
 from toloka2python.account import get_account_info
@@ -69,24 +70,58 @@ class Toloka:
         soup = BeautifulSoup(result.text, "html.parser")
         for torrent in soup.find_all("tr", class_=["prow1", "prow2"]):
             torrent = torrent.find_all("td")
-
+            
+            input_date = torrent[12].text
+            parsed_date = datetime.strptime(input_date, "%Y-%m-%d")
+            output_date = parsed_date.strftime("%y-%m-%d %H:%M")
+            
             torrent_list.append(
                 TorrentElement(
-                    torrent[1].text,  # Форум
-                    torrent[1].find("a", class_="gen")["href"],  # Посил на форум
-                    torrent[2].find("a")["href"],  # Посил на торрент
-                    torrent[2].text,  # Назва
-                    torrent[3].text,  # Автор
-                    True if torrent[4].text == "+" else False,  # Пер
-                    torrent[5].find("a")["href"],  # Посил
-                    torrent[6].text,  # Розмір
-                    torrent[7]["title"],  # Статус
-                    torrent[9].text,  # S
-                    torrent[10].text,  # L
-                    torrent[11].text,  # R
-                    torrent[12].text,  # Додано
+                forum=torrent[1].text,
+                forum_url=torrent[1].find("a", class_="gen")["href"],
+                url=torrent[2].find("a")["href"],
+                name=torrent[2].text,
+                author=torrent[3].text,
+                verify=True if torrent[4].text == "+" else False,
+                torrent_url=torrent[5].find("a")["href"],
+                size=torrent[6].text,
+                status=torrent[7]["title"],
+                seeders=torrent[9].text,
+                leechers=torrent[10].text,
+                answers=torrent[11].text,
+                date=output_date
                 )
             )
+        return torrent_list
+
+    def searchv2(self, nm):
+        """Пошук торрентів за запитом в API"""
+        result = self.session.get(
+            f"{self.toloka_url}/api.php?search={nm}"
+        )
+        torrent_list = []
+        
+        data = result.json()
+
+        torrent_list = []
+        for item in data:
+            torrent_element = TorrentElement(
+                forum=item["forum_name"],
+                forum_url=item["forum_parent"],
+                url=item["link"],
+                name=item["title"],
+                author="",
+                verify=False,
+                torrent_url="",
+                size=item["size"],
+                status="",
+                seeders=int(item["seeders"]),
+                leechers=int(item["leechers"]),
+                answers=int(item["comments"]),
+                date=""
+            )
+            torrent_list.append(torrent_element)
+
         return torrent_list
 
     @property
@@ -116,7 +151,10 @@ class Toloka:
         soup = BeautifulSoup(self.session.get(url + "?spmode=full&dl=names#torrent").text, "html.parser")
 
         name = soup.find("a", class_="maintitle").text
-        url = soup.find("a", class_="maintitle")["href"]
+        url = soup.find("a", class_="maintitle")["href"].replace("/","")
+        forum = soup.select_one("td[class='nav'] h2:nth-of-type(2) a").text
+        forum_url = soup.select_one("td[class='nav'] h2:nth-of-type(2) a")["href"].replace("f","tracker.php?f=")        
+        author = soup.select_one("td.row1 span.name b a").text
         img = soup.find("img", attrs={"alt": name})
         if img:
             img = img.get("src", None)
@@ -129,15 +167,18 @@ class Toloka:
         torrent_url = soup.find("a", string="Завантажити")["href"]
 
         return Torrent(
-            name,
-            url,
-            img,
-            torrent_name.replace("\xa0", " ").replace("\n", "")[1:-1],
-            registered_date,
-            size,
-            int(thanks),
-            rating,
-            torrent_url,
+            forum=forum,
+            forum_url=forum_url,
+            author=author,
+            name = name,
+            url = url,
+            img = img,
+            torrent_name = torrent_name.replace("\xa0", " ").replace("\n", "")[1:-1],
+            date = registered_date,
+            size = size,
+            thanks = int(thanks),
+            rating = rating,
+            torrent_url = torrent_url,
         )
 
     def download_torrent(self, torrent_url: str):
