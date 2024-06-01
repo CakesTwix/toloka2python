@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Any, List
 
 @dataclass
 class Torrent:
@@ -9,12 +10,21 @@ class Torrent:
     name: str = ""
     author: str = ""
     img: str = ""
+    thumbnail: str = ""
     torrent_name: str = ""
     date: str = ""
     size: str = ""
     thanks: int = ""
     rating: int = ""
     torrent_url: str = ""
+    files: List[Any] = None
+
+@dataclass
+class TorrentFile:
+    """Датаклас, який містить інформацію про Список файлів завантаження"""
+    folder_name: str = ""
+    file_name: str = ""
+    size: str = ""
 
 @dataclass
 class TorrentElement:

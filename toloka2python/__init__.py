@@ -2,11 +2,12 @@
 import json
 import os
 import logging
+import re
 
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
-from toloka2python.models.torrent import TorrentElement, TorrentAccount, Torrent
+from toloka2python.models.torrent import TorrentElement, TorrentAccount, Torrent, TorrentFile
 from toloka2python.models.account import Account
 from toloka2python.account import get_account_info
 
@@ -148,16 +149,21 @@ class Toloka:
 
     def get_torrent(self, url):
         """Отримати інформацію про торрент за посиланням"""
-        soup = BeautifulSoup(self.session.get(url + "?spmode=full&dl=names#torrent").text, "html.parser")
+        content = self.session.get(url + "?spmode=full&dl=names#torrent").text
+        # Remove extra whitespace, newline, and tab characters using regular expressions
+        cleaned_content = re.sub(r'[\n\t]+', '', content)
+        soup = BeautifulSoup(cleaned_content, "html.parser")
 
         name = soup.find("a", class_="maintitle").text
         url = soup.find("a", class_="maintitle")["href"].replace("/","")
         forum = soup.select_one("td[class='nav'] h2:nth-of-type(2) a").text
         forum_url = soup.select_one("td[class='nav'] h2:nth-of-type(2) a")["href"].replace("f","tracker.php?f=")        
         author = soup.select_one("td.row1 span.name b a").text
+        
+        thumb = soup.select_one("[rel=image_src]")['href']
         img = soup.find("img", attrs={"alt": name})
-        if img:
-            img = img.get("src", None)
+        img_alt = soup.select_one(".postbody > [align=center] img")
+        img = img.get("src") if img else f"https:{img_alt.get("src")}" if img_alt else None
 
         torrent_name = soup.find("tr", class_="row6_to").text
         registered_date = soup.find("td", string=" Зареєстрований: ").find_next("td").contents[0][3:]
@@ -166,6 +172,22 @@ class Toloka:
         rating = soup.find("span", attrs={"itemprop": "ratingValue"}).text
         torrent_url = soup.find("a", string="Завантажити")["href"]
 
+        torrent_files = []
+        torrent_files_table = soup.select(".files-wrap tr")
+
+        # Extract folder name
+        folder_name = torrent_files_table[0].select_one("td[align=left]").text.strip() if torrent_files_table[0].select_one("td[align=left]") else None
+
+        # Iterate over the rows, skip the first row with folder name
+        for row in torrent_files_table[1:]:
+            td_elements = row.find_all('td')
+            if len(td_elements) >= 3:  # Ensure there are enough columns in this row
+                row_file_name = td_elements[1].text.strip() if td_elements[1].get('align') == 'left' else ""
+                row_size = td_elements[2].text.strip().replace('\xa0', ' ') if td_elements[2].get('align') == 'right' else ""
+                if row_file_name and row_size:  # Make sure file_name and size are not empty
+                    torrent_file = TorrentFile(folder_name, row_file_name, row_size)
+                    torrent_files.append(torrent_file)
+        
         return Torrent(
             forum=forum,
             forum_url=forum_url,
@@ -173,12 +195,14 @@ class Toloka:
             name = name,
             url = url,
             img = img,
+            thumbnail=thumb,
             torrent_name = torrent_name.replace("\xa0", " ").replace("\n", "")[1:-1],
             date = registered_date,
             size = size,
             thanks = int(thanks),
             rating = rating,
             torrent_url = torrent_url,
+            files = torrent_files
         )
 
     def download_torrent(self, torrent_url: str):
