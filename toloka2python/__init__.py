@@ -232,9 +232,13 @@ class Toloka:
         name = soup.find("a", class_="maintitle").text
         url = soup.find("a", class_="maintitle")["href"].replace("/","")
         forum = soup.select_one("td[class='nav'] h2:nth-of-type(2) a").text
-        forum_url = soup.select_one("td[class='nav'] h2:nth-of-type(2) a")["href"].replace("f","tracker.php?f=")        
-        author = soup.select_one("td.row1 span.name b a").text
+        forum_url = soup.select_one("td[class='nav'] h2:nth-of-type(2) a")["href"].replace("f","tracker.php?f=")
         
+        author = ""
+        try:      
+            author = soup.select_one("td.row1 span.name b a").text
+        except Exception as e:
+            author = "Anonymous"
         thumb = soup.select_one("[rel=image_src]")['href']
         img = soup.find("img", attrs={"alt": name})
         img_alt = soup.select_one(".postbody > [align=center] img")
