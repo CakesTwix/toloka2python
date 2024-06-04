@@ -6,7 +6,7 @@ setup(
         'requests', 'beautifulsoup4'
     ],
     packages = ['toloka2python', 'toloka2python/models'],
-    version='0.1.1',
+    version='0.2.1',
     description='Бібліотека на пітоні для взаємодії з українським торрент-трекером Toloka',
     author='CakesTwix',
     license='GPL3',

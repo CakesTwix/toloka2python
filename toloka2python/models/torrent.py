@@ -18,6 +18,7 @@ class Torrent:
     rating: int = ""
     torrent_url: str = ""
     files: List[Any] = None
+    description: str = ""
 
 @dataclass
 class TorrentFile:
