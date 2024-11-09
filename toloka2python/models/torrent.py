@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from typing import Any, List
 
+
 @dataclass
 class Torrent:
     """Датаклас, який містить інформацію про торрент"""
+
     forum: str = ""
     forum_url: str = ""
     url: str = ""
@@ -20,16 +22,20 @@ class Torrent:
     files: List[Any] = None
     description: str = ""
 
+
 @dataclass
 class TorrentFile:
     """Датаклас, який містить інформацію про Список файлів завантаження"""
+
     folder_name: str = ""
     file_name: str = ""
     size: str = ""
 
+
 @dataclass
 class TorrentElement:
     """Датаклас, що містить інформацію про торрент зі списку торрентів під час пошуку"""
+
     forum: str
     forum_url: str
     url: str
@@ -48,6 +54,7 @@ class TorrentElement:
 @dataclass
 class TorrentAccount:
     """Датаклас, що містить інформацію про торрент зі списку торрентів з акаунта користувача"""
+
     forum: str
     forum_url: str
     name: str
